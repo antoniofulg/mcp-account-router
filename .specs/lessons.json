@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "promote_threshold": 2,
+  "window_days": 45,
+  "quarantine_threshold": 2,
+  "next_id": 3,
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "surviving_mutant::enable caching for every compared tool and rotate an environment backed credential before asserting cache identity isolation through provider calls",
+      "text": "Enable caching for every compared tool and rotate an environment-backed credential before asserting cache identity isolation through provider calls.",
+      "signal": "surviving_mutant",
+      "scope": "cache",
+      "status": "candidate",
+      "features": ["generic-router"],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": ["VR-001; test/router.test.mjs:33,54-55; src/router.ts:18 (cache)"],
+      "created": "2026-10-11T01:51:36Z",
+      "last_seen": "2026-10-11T01:51:36Z"
+    },
+    {
+      "id": "L-002",
+      "key": "ac_gap::assert denied statuses at every declared http control route rather than inferring them from a shared guard tested on another route",
+      "text": "Assert denied statuses at every declared HTTP control route rather than inferring them from a shared guard tested on another route.",
+      "signal": "ac_gap",
+      "scope": "gateway",
+      "status": "candidate",
+      "features": ["generic-router"],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "VR-002; plan.md:36-38; test/integration.test.mjs:157-173,226-228,263-265 (gateway)"
+      ],
+      "created": "2026-10-11T01:51:36Z",
+      "last_seen": "2026-10-11T01:51:36Z"
+    }
+  ]
+}

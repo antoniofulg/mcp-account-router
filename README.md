@@ -128,3 +128,6 @@ public package contents. Tests use synthetic fixtures and do not read private
 operator credentials. See `THIRD_PARTY_NOTICES.md` for attribution.
 
 See [ROADMAP.md](ROADMAP.md) for deferred capabilities and their decision boundaries.
+
+Independent readiness evidence: [verification report](https://github.com/antoniofulg/mcp-account-router/blob/main/docs/verification.md).
+See [security boundaries](https://github.com/antoniofulg/mcp-account-router/blob/main/docs/security.md) and [deferred decisions](ROADMAP.md).
