@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { mkdtempSync, realpathSync, mkdirSync, writeFileSync, rmSync, readFileSync } from "node:fs";
+import { mkdtempSync, realpathSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
@@ -78,6 +78,7 @@ export async function upstream(behavior) {
     if (body.method === "tools/call") {
       const call = {
         profile: req.headers["x-profile"] ?? "anonymous",
+        authorization: req.headers.authorization,
         name: body.params.name,
         args: body.params.arguments,
       };

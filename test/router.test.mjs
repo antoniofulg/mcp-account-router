@@ -26,11 +26,25 @@ test("C04 explicit policy", async () => {
   }
 });
 test("C05 cache boundaries", async () => {
+  const credentialEnv = "ROUTER_CACHE_ROTATION_TEST";
+  const previousCredential = process.env[credentialEnv];
   const box = sandbox(),
-    provider = await upstream(),
+    provider = await upstream((call) => {
+      const account =
+        call.authorization === "Bearer synthetic-cache-account-one"
+          ? "account-one"
+          : call.authorization === "Bearer synthetic-cache-account-two"
+            ? "account-two"
+            : call.profile;
+      const value = result(account, call.args);
+      value.structuredContent.tool = call.name;
+      return value;
+    }),
     routers = [];
   const make = (profiles = [profile(provider.url)], ttl) => {
-    const router = new Router(config(box, profiles, { "fixture.echo": policy() }, ttl));
+    const router = new Router(
+      config(box, profiles, { "fixture.echo": policy(), "different.tool": policy() }, ttl),
+    );
     routers.push(router);
     return router;
   };
@@ -51,11 +65,34 @@ test("C05 cache boundaries", async () => {
     await router.call("fixture.echo", { a: 1, b: 2 });
     assert.equal(provider.calls.length, 3);
     await router.call("fixture.echo", { a: 2, b: 2 });
-    await router.call("different.tool", { a: 1, b: 2 });
+    assert.equal(
+      content(await router.call("different.tool", { a: 1, b: 2 })).tool,
+      "different.tool",
+    );
+    assert.equal(content(await router.call("fixture.echo", { a: 1, b: 2 })).tool, "fixture.echo");
     assert.equal(provider.calls.length, 5);
     const rotated = make([profile(provider.url, "a", { headers: { "X-Profile": "rotated" } })]);
     assert.equal(content(await rotated.call("fixture.echo", { a: 1, b: 2 })).profile, "rotated");
     assert.equal(provider.calls.length, 6);
+    const credentialProfile = profile(provider.url, "a", {
+      headers: { "X-Profile": "a", Authorization: { env: credentialEnv, prefix: "Bearer " } },
+    });
+    process.env[credentialEnv] = "synthetic-cache-account-one";
+    const firstCredential = make([credentialProfile]);
+    assert.equal(
+      content(await firstCredential.call("fixture.echo", { a: 1, b: 2 })).profile,
+      "account-one",
+    );
+    await firstCredential.call("fixture.echo", { a: 1, b: 2 });
+    assert.equal(provider.calls.length, 7);
+    process.env[credentialEnv] = "synthetic-cache-account-two";
+    const secondCredential = make([credentialProfile]);
+    assert.equal(
+      content(await secondCredential.call("fixture.echo", { a: 1, b: 2 })).profile,
+      "account-two",
+    );
+    await secondCredential.call("fixture.echo", { a: 1, b: 2 });
+    assert.equal(provider.calls.length, 8);
     box.write({
       different: { profiles: [profile(provider.url)], safeTools: { "fixture.echo": policy() } },
     });
@@ -63,15 +100,17 @@ test("C05 cache boundaries", async () => {
     const realm = new Router(loadConfigurations(box.file, "different")[0]);
     routers.push(realm);
     await realm.call("fixture.echo", { a: 1, b: 2 });
-    assert.equal(provider.calls.length, 7);
+    assert.equal(provider.calls.length, 9);
     const off = make([profile(provider.url)], 0);
     await off.call("fixture.echo", { a: 1, b: 2 });
     await off.call("fixture.echo", { a: 1, b: 2 });
-    assert.equal(provider.calls.length, 9);
+    assert.equal(provider.calls.length, 11);
   } finally {
     await Promise.all(routers.map((router) => router.close()));
     await provider.close();
     box.clean();
+    if (previousCredential === undefined) delete process.env[credentialEnv];
+    else process.env[credentialEnv] = previousCredential;
   }
 });
 test("C06 read coalescing", async () => {

@@ -76,6 +76,8 @@ Proof: `node --test --test-concurrency=1 --test-name-pattern='^C14 public packag
 | Private paths (5) | ordinary 0700/0600 C11 · symlink parent C11 · symlink config C11 · symlink token C11 · symlink cache record C11 | - |
 | Gateway guards (6) | loopback bind C12 · missing bearer C12 · wrong bearer C12 · disallowed Host C12 · foreign Origin C12 · authorized control C12 | - |
 | `HTTP /mcp` statuses (7) | 200 C12 · 202 C12 · 400 C12 · 401 C12 · 403 C12 · 405 unsupported method C12 · 500 C12 | - |
+| `GET /_router/status` statuses (3) | 200 authorized C12 · 401 missing/wrong bearer C12 · 403 disallowed Host/Origin C12 | - |
+| `POST /_router/stop` statuses (3) | 200 authorized C12 · 401 missing/wrong bearer C12 · 403 disallowed Host/Origin C12 | - |
 | Secret-bearing source (3) | config C13 · HTTP failure C13 · stdio failure C13 | - |
 | Public artifacts (4) | synthetic examples C14 · package dry-run C14 · tracked history C14 · license attribution C14 | - |
 | Startup assembly (2) | shipped CLI daemon/bridge C1 · direct router test assembly C4 | - |

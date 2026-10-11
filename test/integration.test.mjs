@@ -3,12 +3,10 @@ import assert from "node:assert/strict";
 import { request as httpRequest } from "node:http";
 import { createConnection } from "node:net";
 import { resolve, join } from "node:path";
-import { readFileSync, writeFileSync, unlinkSync } from "node:fs";
+import { writeFileSync, unlinkSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { startGateway } from "../dist/gateway.js";
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
-import { paths, readState } from "../dist/daemon.js";
-import { loadConfigurations } from "../dist/config.js";
 import {
   sandbox,
   upstream,
@@ -154,23 +152,35 @@ test("C12 local gateway authorization", async () => {
   };
   try {
     assert.equal(gateway.server.address().address, "127.0.0.1");
-    for (const variant of [
-      {},
-      { Authorization: "Bearer wrong" },
-      { ...headers, Host: "evil.example" },
-      { ...headers, Origin: "https://evil.example" },
+    const bootstrapRequests = provider.requests.length;
+    for (const [path, method] of [
+      ["/mcp", "POST"],
+      ["/_router/status", "GET"],
+      ["/_router/stop", "POST"],
     ]) {
-      const code = await new Promise((resolve, reject) => {
-        const req = httpRequest(gateway.url, { method: "POST", headers: variant }, (res) => {
-          res.resume();
-          resolve(res.statusCode);
+      for (const variant of [
+        {},
+        { Authorization: "Bearer wrong" },
+        { ...headers, Host: "evil.example" },
+        { ...headers, Origin: "https://evil.example" },
+      ]) {
+        const code = await new Promise((resolve, reject) => {
+          const req = httpRequest(
+            new URL(path, gateway.url),
+            { method, headers: variant },
+            (res) => {
+              res.resume();
+              resolve(res.statusCode);
+            },
+          );
+          req.on("error", reject);
+          req.setTimeout(2000, () => req.destroy(new Error("guard response timed out")));
+          req.end();
         });
-        req.on("error", reject);
-        req.setTimeout(2000, () => req.destroy(new Error("guard response timed out")));
-        req.end(JSON.stringify(payload));
-      });
-      assert.equal(code, variant.Host || variant.Origin ? 403 : 401);
+        assert.equal(code, variant.Host || variant.Origin ? 403 : 401, `${method} ${path}`);
+      }
     }
+    assert.equal(provider.requests.length, bootstrapRequests);
     const malformedStatus = await new Promise((resolve, reject) => {
       const endpoint = new URL(gateway.url);
       const socket = createConnection(Number(endpoint.port), endpoint.hostname);
