@@ -1,0 +1,40 @@
+{
+  "name": "mcp-account-router",
+  "version": "0.1.0",
+  "description": "Operator-controlled local MCP tools routing across independent profiles",
+  "license": "MIT",
+  "bin": {
+    "mcp-account-router": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "examples",
+    "THIRD_PARTY_NOTICES.md",
+    "ROADMAP.md"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint src && oxfmt --check src test package.json tsconfig.json README.md ROADMAP.md THIRD_PARTY_NOTICES.md LICENSE examples .github",
+    "format": "oxfmt src test package.json tsconfig.json README.md ROADMAP.md THIRD_PARTY_NOTICES.md LICENSE examples .github",
+    "test": "npm run build && node --test --test-concurrency=1 test/*.test.mjs",
+    "check": "npm run lint && npm run typecheck && npm test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.3.1",
+    "@modelcontextprotocol/node": "2.1.1",
+    "@modelcontextprotocol/server": "2.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.15",
+    "oxfmt": "0.72.0",
+    "oxlint": "1.63.0",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

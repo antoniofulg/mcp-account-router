@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "servers": {
+    "docs": {
+      "profiles": [
+        {
+          "name": "account-a",
+          "transport": "http",
+          "url": "https://mcp.example.invalid/mcp",
+          "headers": { "Authorization": { "env": "DOCS_ACCOUNT_A_TOKEN", "prefix": "Bearer " } }
+        },
+        {
+          "name": "account-b",
+          "transport": "http",
+          "url": "https://mcp.example.invalid/mcp",
+          "headers": { "Authorization": { "env": "DOCS_ACCOUNT_B_TOKEN", "prefix": "Bearer " } }
+        }
+      ],
+      "cacheTtlSeconds": 604800,
+      "safeTools": {
+        "search": {
+          "readOnly": true,
+          "cache": true,
+          "dedupe": true,
+          "failover": true,
+          "http429": true,
+          "quotaPatterns": ["quota exhausted"]
+        }
+      }
+    },
+    "local": {
+      "profiles": [
+        {
+          "name": "operator-child",
+          "transport": "stdio",
+          "command": "node",
+          "args": ["/absolute/path/to/your-mcp-server.mjs"],
+          "env": { "API_TOKEN": { "env": "LOCAL_SERVER_TOKEN" } }
+        }
+      ]
+    }
+  }
+}

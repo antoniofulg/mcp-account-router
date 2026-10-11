@@ -33,6 +33,10 @@ One Server owns one or more Profiles and zero or more Tool policies. One cache e
 | Route | In | Out | Status |
 | --- | --- | --- | --- |
 | `HTTP /mcp` | SDK MCP initialize/notifications/tools POST requests; local bearer, Host and optional Origin | Legacy stateless MCP response or notification acceptance; unsupported methods denied; denied requests have no provider work | 200, 202, 400, 401, 403, 405, 500 |
+| `GET /_router/status` | Same local bearer/Host/Origin guards | Local counters, profile availability and daemon identity, no provider quota queries | 200, 401, 403 |
+| `POST /_router/stop` | Same local bearer/Host/Origin guards | Acknowledged shutdown of daemon and upstream connections | 200, 401, 403 |
+
+Build placement: official `@modelcontextprotocol/node@2.1.1` converts Node HTTP to the SDK fetch handler; its peer contract supports server2.3.1. Startup discovery uses authenticated status, and an atomic private directory serializes concurrent daemon starts. A changed configuration requires explicit stop/reconnect; no automatic foreign-process restart.
 
 CLI: `mcp-account-router connect --config FILE --server NAME`, `validate --config FILE`, `status --config FILE --server NAME`, and `stop --config FILE --server NAME`. Required flags have no implicit server choice. `validate` exits 0 for valid configuration and 1 for invalid configuration. Status is secret-free local JSON counters/availability, never a universal provider quota API. Stop exits 0 after acknowledged shutdown (including an already stopped daemon) and 1 on a reported failure. Connect writes only protocol traffic to stdout; diagnostics use stderr and never print daemon credentials. Internal control route placement is reversible and must be recorded additively once selected; no public unauthenticated shutdown route.
 

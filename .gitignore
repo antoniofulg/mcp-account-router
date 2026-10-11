@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+*.log
+*.key
+*.pem
+*.tgz
+.state/
+.cache/
+state/
+cache/
+credentials*.json
+accounts*.json
+config.local.*
+.DS_Store
